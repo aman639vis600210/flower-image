@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Height Gallery | Somnath Prajapati</title>
+    <style>
+        :root { --p-red: #e60023; --p-gray: #efefef; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        
+        body { background: white; padding-top: 80px; }
+
+        /* Header Fix */
+        header {
+            position: fixed; top: 0; width: 100%; background: white;
+            display: flex; align-items: center; padding: 10px 20px;
+            gap: 15px; z-index: 1000; box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+        .logo { color: var(--p-red); font-size: 30px; font-weight: bold; cursor: pointer; text-decoration: none; }
+        
+        .search-box {
+            flex: 1; background: var(--p-gray); border-radius: 25px;
+            display: flex; align-items: center; padding: 0 15px; height: 45px;
+        }
+        .search-box input {
+            width: 100%; border: none; background: transparent; outline: none;
+            padding-left: 10px; font-size: 16px; color: #333;
+        }
+
+        .action-btn {
+            background: var(--p-red); color: white; border: none;
+            padding: 10px 18px; border-radius: 20px; font-weight: bold; cursor: pointer;
+        }
+
+        /* Wide Responsive Grid (Perfect Image Adjust) */
+        .container { padding: 0 20px; max-width: 1500px; margin: 0 auto; }
+        .masonry {
+            column-count: 3; /* Wide Columns */
+            column-gap: 20px;
+        }
+        @media (max-width: 900px) { .masonry { column-count: 2; } }
+        @media (max-width: 500px) { .masonry { column-count: 1; } }
+
+        .image-card {
+            break-inside: avoid; margin-bottom: 20px; cursor: zoom-in;
+            border-radius: 16px; overflow: hidden; background: #f0f0f0;
+            transition: transform 0.2s ease;
+            display: inline-block; /* Prevent column gap issues */
+            width: 100%;
+        }
+        .image-card:hover { transform: scale(1.01); }
+        
+        /* Perfect Auto Height - No Stretching */
+        .image-card img { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+            border-radius: 16px; 
+            object-fit: contain; /* Prevents stretch/cut */
+        }
+        .image-card p { padding: 12px; font-weight: 500; font-size: 14px; color: #111; }
+
+        /* Full View Modal (White Display) */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 2000; overflow-y: auto; text-align: center;
+        }
+        .modal-content {
+            max-width: 700px; margin: 40px auto; display: flex; flex-direction: column; align-items: center; padding: 20px;
+        }
+        .close-btn { position: absolute; top: 20px; left: 20px; font-size: 30px; cursor: pointer; background: #efefef; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border: none; }
+        
+        .full-img { max-width: 100%; height: auto; border-radius: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        
+        /* Buttons BELOW image */
+        .controls { margin-top: 25px; display: flex; gap: 15px; width: 90%; justify-content: center; }
+        .dl-btn { background: #efefef; color: black; padding: 15px 30px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .save-btn-big { background: var(--p-red); color: white; padding: 15px 40px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
+
+        /* Upload Popup */
+        #uploadForm {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; padding: 30px; border-radius: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.3); z-index: 3000; width: 350px;
+        }
+        #uploadForm h3 { margin-bottom: 20px; }
+        #uploadForm input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; }
+
+        /* Code Generator Box (New) */
+        #codeOutputBox {
+            display: none; position: fixed; bottom: 20px; right: 20px; width: 320px; 
+            background: #1e1e1e; color: #4ade80; padding: 15px; border-radius: 12px; font-family: monospace; font-size: 11px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4); z-index: 4000; border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">P</div>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search for ideas..." onkeyup="doSearch()">
+    </div>
+    <button class="action-btn" onclick="toggleUpload(true)">Upload</button>
+</header>
+
+<div class="container">
+    <div class="masonry" id="galleryGrid">
+        <div class="image-card" onclick="openView(this)" data-tag="pe">
+    <img src="Pe1.jpg">
+    <p>Pe</p>
+</div>
+        <div class="image-card" onclick="openView(this)" data-tag="mustard field close up nature summer">
+            <img src="https://images.unsplash.com/photo-1550948390-6eb7fa773072?w=800">
+            <p>Mustard Field Close-up</p>
+        </div>
+    </div>
+</div>
+
+<div id="fullView" class="modal">
+    <button class="close-btn" onclick="closeView()">&larr;</button>
+    <div class="modal-content">
+        <img id="mainImg" class="full-img" src="">
+        <h2 id="imgTitle" style="margin-top: 25px; color: #111;"></h2>
+        <div class="controls">
+            <button class="dl-btn" onclick="downloadImg()">Download</button>
+            <button class="save-btn-big" onclick="alert('Saved to your profile!')">Save Image</button>
+        </div>
+    </div>
+</div>
+
+<div id="uploadForm">
+    <h3>Add New Image</h3>
+    <input type="text" id="newUrl" placeholder="Paste Image URL here">
+    <input type="text" id="newTitle" placeholder="Image Title (e.g. Sarson)">
+    <button class="action-btn" style="width: 100%;" onclick="addNew()">Add to Gallery</button>
+    <button onclick="toggleUpload(false)" style="width: 100%; margin-top: 10px; background: none; border: none; color: gray; cursor: pointer;">Cancel</button>
+</div>
+
+<div id="codeOutputBox">
+    <p style="color: white; margin-bottom: 8px;"><b>Copy & Paste in your HTML:</b></p>
+    <textarea id="codeText" readonly style="width:100%; height:100px; background:#000; color:#4ade80; border:1px solid #444; padding:8px; font-size:11px; outline: none; resize: none;"></textarea>
+    <button onclick="this.parentElement.style.display='none'" style="margin-top:10px; cursor:pointer; background:var(--p-red); color:white; border:none; padding:8px 15px; border-radius:5px; font-weight: bold;">Done</button>
+</div>
+
+<script>
+    // 1. Permanent Image Coding Structure
+    const generateImageCode = (url, title) => {
+        return `<div class="image-card" onclick="openView(this)" data-tag="${title.toLowerCase()}">\n    <img src="${url}">\n    <p>${title}</p>\n</div>`;
+    };
+
+    // 2. Search Logic (Filtering)
+    function doSearch() {
+        let term = document.getElementById('searchInput').value.toLowerCase();
+        let cards = document.getElementsByClassName('image-card');
+        for (let card of cards) {
+            let tags = card.getAttribute('data-tag').toLowerCase();
+            let title = card.querySelector('p').innerText.toLowerCase();
+            card.style.display = (tags.includes(term) || title.includes(term)) ? "inline-block" : "none";
+        }
+    }
+
+    // 3. Open / Close View Logic
+    function openView(element) {
+        let src = element.querySelector('img').src;
+        let title = element.querySelector('p').innerText;
+        document.getElementById('mainImg').src = src;
+        document.getElementById('imgTitle').innerText = title;
+        document.getElementById('fullView').style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Stop scrolling
+    }
+
+    function closeView() {
+        document.getElementById('fullView').style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+
+    // 4. Upload & Code Generation Logic
+    function toggleUpload(show) {
+        document.getElementById('uploadForm').style.display = show ? 'block' : 'none';
+    }
+
+    function addNew() {
+        let url = document.getElementById('newUrl').value;
+        let title = document.getElementById('newTitle').value;
+        if(!url || !title) return alert("Please fill both URL and Title!");
+
+        let grid = document.getElementById('galleryGrid');
+        
+        // Generate the code and insert it dynamically
+        const newCardCode = generateImageCode(url, title);
+        grid.insertAdjacentHTML('afterbegin', newCardCode);
+        
+        // Show the generated code for user to copy/paste in their original HTML file
+        document.getElementById('codeText').value = newCardCode;
+        document.getElementById('codeOutputBox').style.display = 'block';
+        
+        toggleUpload(false);
+        // Clear inputs
+        document.getElementById('newUrl').value = "";
+        document.getElementById('newTitle').value = "";
+    }
+
+    // 5. Download Image Logic
+    async function downloadImg() {
+        const src = document.getElementById('mainImg').src;
+        try {
+            const response = await fetch(src);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'PowerAir_Somnath_Gallery_Image.jpg';
+            a.click();
+        } catch(e) {
+            window.open(src, '_blank');
+        }
+    }
+</script>
+
+</body>
+</html>
+
+
